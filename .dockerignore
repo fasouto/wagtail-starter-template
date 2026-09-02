@@ -8,3 +8,8 @@ staticfiles
 public/static
 public/media
 .git
+.github
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov

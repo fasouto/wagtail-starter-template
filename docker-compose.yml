@@ -6,6 +6,8 @@ services:
     command: uv run python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      # Keep the container's virtualenv separate from the host's .venv
+      - /app/.venv
     ports:
       - "8000:8000"
     env_file: .env
@@ -17,7 +19,7 @@ services:
         condition: service_healthy
 
   db:
-    image: postgres:16
+    image: postgres:17
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:

@@ -44,7 +44,7 @@ Railway has no persistent disk. Media uploads (images, documents) work locally b
 
 ### Option A: uv (recommended)
 
-Prerequisites: [Python 3.12+](https://python.org), [uv](https://docs.astral.sh/uv/getting-started/installation/)
+Prerequisites: [uv](https://docs.astral.sh/uv/getting-started/installation/) (it installs Python 3.13 for you if needed)
 
 ```bash
 git clone https://github.com/fasouto/wagtail-starter-template.git
@@ -69,13 +69,15 @@ uv run python manage.py runserver
 Open [http://localhost:8000](http://localhost:8000). The Wagtail admin is at [http://localhost:8000/admin/](http://localhost:8000/admin/).
 
 ```bash
-# Run tests
-uv run pytest
+# Run tests (with coverage)
+uv run coverage run -m pytest && uv run coverage report
 
 # Lint and format
 uv run ruff check .
 uv run ruff format .
 ```
+
+The same checks run in GitHub Actions on every push and pull request.
 
 ### Option B: Docker Compose
 
@@ -118,7 +120,10 @@ Open [http://localhost:8000](http://localhost:8000). Code changes reload automat
 │   ├── urls.py              # URL routing (Wagtail admin, Django admin, health)
 │   ├── asgi.py
 │   └── wsgi.py
-├── docker-compose.yml       # Local dev with Docker (Wagtail + Postgres)
+├── .github/
+│   ├── workflows/ci.yml     # GitHub Actions: lint, checks, tests
+│   └── dependabot.yml       # Weekly dependency updates (uv, actions, Docker)
+├── docker-compose.yml       # Local dev with Docker (Wagtail + Postgres 17)
 ├── Dockerfile.dev           # Dev container
 ├── pyproject.toml           # Dependencies and tool config
 ├── railway.toml             # Railway deployment config
@@ -127,8 +132,9 @@ Open [http://localhost:8000](http://localhost:8000). Code changes reload automat
 
 ## What's Included
 
-- **[Wagtail 7.0 LTS](https://docs.wagtail.org/)**: powerful CMS built on Django, supported until April 2028
+- **[Wagtail 7.4 LTS](https://docs.wagtail.org/)**: powerful CMS built on Django, supported until November 2027
 - **[Django 5.2 LTS](https://docs.djangoproject.com/en/5.2/)**: supported until April 2028
+- **Python 3.13** via `.python-version`, picked up by uv, Docker, and Railway
 - **[PostgreSQL](https://www.postgresql.org/)** via psycopg3, modern async-capable adapter
 - **[WhiteNoise](https://whitenoise.readthedocs.io/)**: serve static files without nginx, with brotli compression
 - **[django-environ](https://django-environ.readthedocs.io/)**: configure via environment variables and `.env` files
@@ -136,8 +142,11 @@ Open [http://localhost:8000](http://localhost:8000). Code changes reload automat
 - **Split settings** for separate development and production configurations
 - **Health check** at `/health/`, returns JSON for Railway monitoring
 - **[django-debug-toolbar](https://django-debug-toolbar.readthedocs.io/)**: SQL queries, templates, cache inspection (dev only)
-- **[ruff](https://docs.astral.sh/ruff/)** for linting and formatting
-- **[pytest](https://docs.pytest.org/) + [pytest-django](https://pytest-django.readthedocs.io/)** for testing
+- **[ruff](https://docs.astral.sh/ruff/)** for linting (pyflakes, isort, pyupgrade, bugbear, flake8-django, bandit) and formatting
+- **[pytest](https://docs.pytest.org/) + [pytest-django](https://pytest-django.readthedocs.io/)** for testing, with [coverage](https://coverage.readthedocs.io/)
+- **GitHub Actions CI** running lint, Django system checks, migration checks, and tests
+- **Dependabot** keeping Python packages, GitHub Actions, and Docker images up to date
+- **Persistent database connections** in production (`CONN_MAX_AGE`, health checks)
 
 ## Customization
 
@@ -164,6 +173,18 @@ Then run `uv run python manage.py makemigrations && uv run python manage.py migr
 ### Replacing the CSS
 
 The included `config/static/css/base.css` is minimal and framework-free. Replace it with Bootstrap, Tailwind, or any CSS framework you prefer.
+
+### Upgrading dependencies
+
+Dependabot opens a weekly grouped pull request for Python packages. To upgrade manually:
+
+```bash
+uv lock --upgrade
+uv sync --dev
+uv run pytest
+```
+
+Both Django and Wagtail are pinned to their current LTS lines in `pyproject.toml`. Bump the constraints there when you want to move to a newer major version.
 
 ### Adding Celery
 

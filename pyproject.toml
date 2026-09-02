@@ -1,30 +1,62 @@
 [project]
 name = "wagtail-starter"
-version = "0.1.0"
-requires-python = ">=3.12"
+version = "0.2.0"
+requires-python = ">=3.13"
 dependencies = [
     "django>=5.2,<5.3",
-    "wagtail>=7.0,<8.0",
-    "gunicorn>=22.0",
-    "psycopg[binary,pool]>=3.1",
-    "whitenoise[brotli]>=6.7",
-    "django-environ>=0.11",
+    "wagtail>=7.4,<8.0",
+    "gunicorn>=23.0",
+    "psycopg[binary,pool]>=3.2",
+    "whitenoise[brotli]>=6.9",
+    "django-environ>=0.12",
     "argon2-cffi>=23.1",
 ]
 
 [dependency-groups]
 dev = [
-    "django-debug-toolbar>=4.4",
-    "ruff>=0.6",
-    "pytest>=8.0",
-    "pytest-django>=4.8",
-    "coverage>=7.6",
+    "django-debug-toolbar>=5.0",
+    "ruff>=0.14",
+    "pytest>=8.3",
+    "pytest-django>=4.11",
+    "coverage>=7.10",
 ]
 
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py313"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "DJ",  # flake8-django
+    "S",   # flake8-bandit
+]
+ignore = [
+    "S101",  # assert is fine in tests
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "home"]
+section-order = ["future", "standard-library", "third-party", "django", "wagtail", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+django = ["django"]
+wagtail = ["wagtail", "modelcluster", "taggit"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.development"
 python_files = ["tests.py", "test_*.py"]
+addopts = "--reuse-db"
+filterwarnings = [
+    "ignore:No directory at:UserWarning",
+]
+
+[tool.coverage.run]
+source = ["apps", "config"]
+omit = ["*/migrations/*", "*/tests.py"]

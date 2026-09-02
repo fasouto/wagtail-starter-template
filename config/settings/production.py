@@ -9,7 +9,12 @@ DEBUG = False
 SECRET_KEY = env("SECRET_KEY", default="build-time-placeholder")
 
 DATABASES = {
-    "default": env.db("DATABASE_URL", default="sqlite:///placeholder"),
+    "default": {
+        **env.db("DATABASE_URL", default="sqlite:///placeholder"),
+        # Reuse connections between requests; drop ones the server has closed.
+        "CONN_MAX_AGE": env.int("CONN_MAX_AGE", default=60),
+        "CONN_HEALTH_CHECKS": True,
+    },
 }
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[".railway.app"])

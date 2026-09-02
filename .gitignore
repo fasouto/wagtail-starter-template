@@ -3,6 +3,10 @@
 __pycache__/
 *.egg*
 .coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.ruff_cache/
 
 ## Virtual environment
 .venv/
