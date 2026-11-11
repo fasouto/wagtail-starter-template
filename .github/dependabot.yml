@@ -4,9 +4,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Update uv.lock only; the constraints in pyproject.toml are deliberate.
+    versioning-strategy: lockfile-only
     groups:
       python-dependencies:
         patterns: ["*"]
+    ignore:
+      # Stay on the LTS lines; patch releases still come through.
+      - dependency-name: django
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: wagtail
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: github-actions
     directory: /
@@ -17,3 +25,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Python version is set by .python-version; keep the image in step with it.
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
